@@ -1,0 +1,136 @@
+// ============================================
+// Baza Danych: Aplikacja do Zarządzania Budżetem Domowym
+// Zoptymalizowany format DBML
+// ============================================
+
+Project "Budzet_Domowy" {
+  database_type: 'PostgreSQL'
+  Note: 'Kompletny schemat bazy danych do zarządzania budżetem domowym. Obsługuje: transakcje, konta, cele indywidualne i rodzinne'
+}
+
+// ============================================
+// TABELA: Uzytkownicy
+// ============================================
+Table Uzytkownicy {
+  uzytkownik_id UUID [pk, default: `gen_random_uuid()`]
+  imie VARCHAR(100) [not null]
+  nazwisko VARCHAR(100) [not null]
+  email VARCHAR(255) [not null, unique]
+  haslo_hash VARCHAR(255) [not null]
+  telefon VARCHAR(20)
+  utworzony TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  ostatnia_zmiana TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  ostatnie_logowanie TIMESTAMP
+  aktywny BOOLEAN [default: true]
+  
+  Note: 'Przechowywanie danych użytkowników systemu'
+}
+
+// ============================================
+// TABELA: Kategorie
+// ============================================
+Table Kategorie {
+  kategoria_id UUID [pk, default: `gen_random_uuid()`]
+  nazwa VARCHAR(100) [not null, unique]
+  typ VARCHAR(20) [not null]
+  opis TEXT
+  ikona VARCHAR(50)
+  kolor VARCHAR(7)
+  aktywna BOOLEAN [default: true]
+  kolejnosc INTEGER [default: 0]
+  utworzona TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  
+  Note: 'Słownik kategorii (PRZYCHOD/WYDATEK)'
+}
+
+// ============================================
+// TABELA: Konta
+// ============================================
+Table Konta {
+  konto_id UUID [pk, default: `gen_random_uuid()`]
+  uzytkownik_id UUID [not null, ref: > Uzytkownicy.uzytkownik_id]
+  nazwa VARCHAR(100) [not null]
+  opis TEXT
+  saldo NUMERIC(12,2) [not null, default: 0.00]
+  waluta VARCHAR(3) [default: 'PLN']
+  typ VARCHAR(50)
+  aktywne BOOLEAN [default: true]
+  utworzone TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  ostatnia_zmiana TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  
+  Note: 'Konta bankowe i portfele użytkowników'
+}
+
+// ============================================
+// TABELA: Cele_Oszczednosciowe
+// ============================================
+Table Cele_Oszczednosciowe {
+  cel_id UUID [pk, default: `gen_random_uuid()`]
+  uzytkownik_id UUID [not null, ref: > Uzytkownicy.uzytkownik_id]
+  nazwa VARCHAR(100) [not null]
+  opis TEXT
+  typ VARCHAR(20) [not null]
+  kwota_docelowa NUMERIC(12,2) [not null]
+  kwota_zgromadzona NUMERIC(12,2) [default: 0.00]
+  waluta VARCHAR(3) [default: 'PLN']
+  termin DATE [not null]
+  status VARCHAR(20) [default: 'AKTYWNY']
+  priorytet INTEGER [default: 0]
+  utworzony TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  ostatnia_zmiana TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  
+  Note: 'Cele indywidualne (INDYWIDUALNY) i rodzinne (RODZINNY)'
+}
+
+// ============================================
+// TABELA: Uczestnicy_Celu (M:N)
+// ============================================
+Table Uczestnicy_Celu {
+  cel_id UUID [not null, ref: > Cele_Oszczednosciowe.cel_id]
+  uzytkownik_id UUID [not null, ref: > Uzytkownicy.uzytkownik_id]
+  kwota_wplacona NUMERIC(12,2) [default: 0.00]
+  rola VARCHAR(50) [default: 'UCZESTNIK']
+  data_dolaczenia TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  data_opuszczenia TIMESTAMP
+  
+  indexes {
+    (cel_id, uzytkownik_id) [pk]
+  }
+  
+  Note: 'Relacja M:N - uczestnicy celów rodzinnych'
+}
+
+// ============================================
+// TABELA: Transakcje
+// ============================================
+Table Transakcje {
+  transakcja_id UUID [pk, default: `gen_random_uuid()`]
+  konto_id UUID [not null, ref: > Konta.konto_id]
+  kategoria_id UUID [not null, ref: > Kategorie.kategoria_id]
+  cel_id UUID [ref: > Cele_Oszczednosciowe.cel_id]
+  kwota NUMERIC(12,2) [not null]
+  data_transakcji DATE [not null]
+  typ VARCHAR(20) [not null]
+  opis TEXT
+  metoda_platnosci VARCHAR(50)
+  numer_referencyjny VARCHAR(50)
+  utworzona TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  ostatnia_zmiana TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  
+  Note: 'Typ: PRZYCHOD, WYDATEK, TRANSFER. Cel_id nullable dla przychodu/wydatku'
+}
+
+// ============================================
+// TABELA: Transfery_Miedzy_Kontami
+// ============================================
+Table Transfery_Miedzy_Kontami {
+  transfer_id UUID [pk, default: `gen_random_uuid()`]
+  konto_zrodlo UUID [not null, ref: > Konta.konto_id]
+  konto_docelowe UUID [not null, ref: > Konta.konto_id]
+  kwota NUMERIC(12,2) [not null]
+  opis TEXT
+  data_transferu TIMESTAMP [default: `CURRENT_TIMESTAMP`]
+  status VARCHAR(50) [default: 'ZAKONCZONY']
+  
+  Note: 'Audyt - historia transferów między kontami'
+}
