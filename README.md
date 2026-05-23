@@ -54,7 +54,6 @@ Użyj do tego polecenia (flaga `-v` jest bardzo ważna, bo kasuje stary stan baz
 docker-compose down -v
 docker-compose up -d
 ```
-> ⚠️ **Ważne**: To polecenie tworzy bazę od zera. Wszelkie dane wpisane ręcznie przez `psql` znikną. Dlatego w Fazie 2 napiszemy skrypty _seed_, które będą automatycznie odtwarzać testowe rekordy po każdym takim resecie!
 
 ### 4. AI-Driven Workflow
 Ten projekt jest prowadzony z agentem AI (Antigravity CLI). Każdy członek zespołu:
