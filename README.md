@@ -32,6 +32,7 @@ docker-compose up -d
 > - Port: `5432`
 >
 > Pamiętaj: Jeśli umieścisz kod SQL w folderze `sql/migrations/` zaczynający się od `001_...` to po usunięciu kontenera i postawieniu go na nowo, skrypty wykonają się same!
+> **Ważne:** Docker uruchamia domyślnie TYLKO pliki wrzucone bezpośrednio do `sql/migrations/`. Pliki z innych folderów (np. `sql/views/`, `sql/seed/`) nie uruchomią się same! Jeśli chcemy, by Docker je załadował, musimy zdefiniować w `sql/migrations/` skrypt (np. `.sh` lub `.sql`), który "ściągnie" i odpali resztę, tak jak zrobiliśmy to dla danych testowych.
 
 ### Jak wejść do bazy i pisać zapytania (psql)?
 Gdy kontener już działa, możesz otworzyć wbudowaną konsolę PostgreSQL (`psql`) wpisując w terminalu:

@@ -23,6 +23,7 @@ sql/transactions/ - Przykłady transakcji i poziomów izolacji
 sql/seed/       - Dane testowe
 frontend/       - Prosty frontend HTML+JS
 ```
+> **Ważne info o Dockerze:** Kontener z bazą ładuje i uruchamia automatycznie *tylko* pliki znajdujące się bezpośrednio w folderze `sql/migrations/` (i to alfabetycznie). Kod z innych katalogów (jak `views`, `functions`, `seed`) musi być albo wywoływany ręcznie, albo załączany poprzez dodatkowe skrypty odpalające wewnątrz `migrations/` (np. przez pętlę w bashu).
 
 ## Konwencje nazewnictwa i wytyczne
 Wszystkie konwencje dotyczące kodu SQL (nazewnictwo, schematy, itp.) oraz dokumentacji znajdują się w pliku `docs/conventions.md`. 
