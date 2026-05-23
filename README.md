@@ -33,6 +33,18 @@ docker-compose up -d
 >
 > Pamiętaj: Jeśli umieścisz kod SQL w folderze `sql/migrations/` zaczynający się od `001_...` to po usunięciu kontenera i postawieniu go na nowo, skrypty wykonają się same!
 
+### Jak wejść do bazy i pisać zapytania (psql)?
+Gdy kontener już działa, możesz otworzyć wbudowaną konsolę PostgreSQL (`psql`) wpisując w terminalu:
+```bash
+docker exec -it budget_postgres psql -U budget_user -d budget_db
+```
+Będąc w środku konsoli bazy danych, przydadzą Ci się te komendy:
+- `\dt` - wyświetla wszystkie tabele
+- `\dn` - wyświetla schematy (aby zobaczyć nasz schemat `budget`)
+- `SET search_path TO budget;` - ustawia nasz schemat jako domyślny, żeby nie pisać `budget.nazwa_tabeli`
+- `SELECT * FROM users;` - przykładowe zapytanie (po ustawieniu search_path)
+- `\q` - wyjście z konsoli do normalnego terminala
+
 ### 4. AI-Driven Workflow
 Ten projekt jest prowadzony z agentem AI (Antigravity CLI). Każdy członek zespołu:
 
