@@ -45,6 +45,15 @@ Będąc w środku konsoli bazy danych, przydadzą Ci się te komendy:
 - `SELECT * FROM users;` - przykładowe zapytanie (po ustawieniu search_path)
 - `\q` - wyjście z konsoli do normalnego terminala
 
+### Co zrobić, gdy pojawią się nowe pliki SQL (migracje)?
+Docker ładuje skrypty startowe **tylko raz**, przy pierwszym stworzeniu bazy. Gdy ktoś z zespołu doda nowy plik migracji na GitHuba, a Ty go pobierzesz, musisz zresetować bazę, żeby skrypt się załadował.
+Użyj do tego polecenia (flaga `-v` jest bardzo ważna, bo kasuje stary stan bazy):
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+> ⚠️ **Ważne**: To polecenie tworzy bazę od zera. Wszelkie dane wpisane ręcznie przez `psql` znikną. Dlatego w Fazie 2 napiszemy skrypty _seed_, które będą automatycznie odtwarzać testowe rekordy po każdym takim resecie!
+
 ### 4. AI-Driven Workflow
 Ten projekt jest prowadzony z agentem AI (Antigravity CLI). Każdy członek zespołu:
 
