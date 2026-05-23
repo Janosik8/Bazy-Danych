@@ -17,7 +17,6 @@ sql/views/      - Widoki (w tym materializowane)
 sql/functions/  - Funkcje PL/pgSQL
 sql/triggers/   - Wyzwalacze
 sql/procedures/ - Procedury składowane
-sql/queries/    - Zaawansowane zapytania SQL
 sql/security/   - Role, uprawnienia (GRANT/REVOKE, RLS)
 sql/transactions/ - Przykłady transakcji i poziomów izolacji
 sql/seed/       - Dane testowe
@@ -31,7 +30,6 @@ Zawsze stosuj się do tych zasad podczas tworzenia nowych elementów.
 
 ## Wymagania projektu
 - Poprawnie działające podstawowe funkcjonalności bazy danych
-- Rozbudowana funkcjonalność: zapytania zagnieżdżone, widoki (w tym materializowane)
 - Wyzwalacze i procedury/funkcje w PL/pgSQL
 - Dokumentacja techniczna z diagramami ERD
 - Struktura zgodna z 3NF
