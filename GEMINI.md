@@ -46,11 +46,13 @@ Zawsze stosuj się do tych zasad podczas tworzenia nowych elementów.
 4. Utwórz PR z opisem co zrobiono
 5. Po review - merge do master
 
-## Kontekst dla AI
-Gdy tworzysz SQL dla tego projektu:
-- Zawsze używaj schematu `budget`
-- Dodawaj komentarze wyjaśniające logikę
-- Testuj na danych seed
-- Sprawdź czy tabele są w 3NF
-- Pamiętaj o indeksach na kolumnach WHERE i JOIN
-- Używaj transakcji dla operacji modyfikujących wiele tabel
+## Kontekst dla AI (Antigravity CLI)
+Gdy pracujesz przy tym projekcie, rygorystycznie przestrzegaj poniższych zasad:
+1. **Schemat bazy**: Zawsze używaj prefiksu `budget.` przed nazwami tabel (np. `budget.users`).
+2. **PostgreSQL w Dockerze**:
+   - Kod wykonujący się automatycznie (DDL, początkowa struktura) ląduje w `sql/migrations/`.
+   - Widoki (`sql/views/`), procedury (`sql/functions/`) i skrypty ładujące dane (`sql/seed/`) muszą być explicite wywołane (np. poprzez specjalne skrypty powłoki wewnątrz `/migrations/` lub uruchomienie ręczne).
+3. **Dokumentacja wbudowana**: Pisz jasne komentarze `COMMENT ON TABLE` i `COMMENT ON COLUMN` dla każdego nowego elementu schematu.
+4. **Jakość kodu**: Stosuj 3NF, używaj precyzyjnych typów numerycznych (np. `NUMERIC(12,2)` zamiast `FLOAT`), oraz pamiętaj o nakładaniu indeksów na klucze obce.
+5. **Cykl pracy z zadaniami**: Zawsze pracuj na nowym odgałęzieniu (`feature/...`). Zanim utworzysz dziesiątki linii kodu, opracuj `implementation_plan.md` i zapytaj użytkownika o zgodę. Po akceptacji twórz `task.md`, a na koniec podsumuj pracę w `walkthrough.md`. Nigdy nie commituj bez zapytania o zgodę!
+6. **Polski język**: Opisy do bazy, dokumentacja i komunikacja z zespołem musi odbywać się w języku polskim. Kod SQL (nazwy, aliasy) zawsze po angielsku.
