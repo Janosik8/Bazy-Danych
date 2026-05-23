@@ -89,7 +89,7 @@ frontend/      → Prosty frontend
 - **Dla agenta AI**: Agent wykorzystuje wszystkie pliki, ale szczególnie polega na szczegółowych plikach jak `logical-model.md` czy `physical-model.md`, które opisują relacje, typy i 3NF w bazie.
 
 > 💡 **Jak zobaczyć diagram ERD w VS Code?**
-> W pliku `docs/erd.md` użyliśmy formatu **Mermaid**. Aby go zobaczyć jako piękny, zainstaluj wtyczkę do VS Code np. **"Markdown Preview Mermaid Support"** (wtyczka do Mermaid jest natywnie w VSC od wersji 1.121.) lub otwórz plik na GitHubie (który natywnie renderuje Mermaid).
+> W pliku `docs/erd.md` użyliśmy formatu **Mermaid**. Aby go zobaczyć jako piękny diagram, zainstaluj wtyczkę do VS Code np. **"Markdown Preview Mermaid Support"** (wtyczka do Mermaid jest natywnie w VSC od wersji 1.121.) lub otwórz plik na GitHubie (który natywnie renderuje Mermaid).
 
 ## 👥 Zespół
 - Osoba A - @mateog-918
