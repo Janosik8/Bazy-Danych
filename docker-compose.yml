@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: budget_postgres
+    environment:
+      POSTGRES_USER: budget_user
+      POSTGRES_PASSWORD: budget_pass
+      POSTGRES_DB: budget_db
+    ports:
+      - "5432:5432"
+    volumes:
+      # Zachowuje dane bazy lokalnie pomiędzy restartami (w folderze .docker-data)
+      - ./.docker-data/postgres:/var/lib/postgresql/data
+      # Automatycznie odpala skrypty SQL z tego folderu przy pierwszym uruchomieniu
+      - ./sql/migrations:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U budget_user -d budget_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

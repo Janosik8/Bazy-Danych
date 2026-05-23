@@ -10,9 +10,9 @@ Aplikacja do zarządzania budżetem domowym. Projekt na przedmiot Bazy Danych (s
 ## 🚀 Jak zacząć?
 
 ### 1. Zainstaluj narzędzia
-- [PostgreSQL 16+](https://www.postgresql.org/download/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) - do uruchomienia bazy lokalnie
 - [Antigravity CLI](https://github.com/google-gemini/antigravity-cli) - nasz agent AI
-- [GitHub CLI](https://cli.github.com/) - do issues
+- [GitHub CLI](https://cli.github.com/) - do zarządzania issues z terminala
 
 ### 2. Sklonuj repo
 ```bash
@@ -20,7 +20,20 @@ git clone https://github.com/Janosik8/Bazy-Danych.git
 cd Bazy-Danych
 ```
 
-### 3. AI-Driven Workflow
+### 3. Uruchom bazę danych (Docker)
+Wystarczy użyć pliku `docker-compose.yml`, który postawi lokalną bazę PostgreSQL (wersja 16) gotową do pracy:
+```bash
+docker-compose up -d
+```
+> **Dane dostępowe:**
+> - Użytkownik: `budget_user`
+> - Hasło: `budget_pass`
+> - Nazwa bazy: `budget_db`
+> - Port: `5432`
+>
+> Pamiętaj: Jeśli umieścisz kod SQL w folderze `sql/migrations/` zaczynający się od `001_...` to po usunięciu kontenera i postawieniu go na nowo, skrypty wykonają się same!
+
+### 4. AI-Driven Workflow
 Ten projekt jest prowadzony z agentem AI (Antigravity CLI). Każdy członek zespołu:
 
 1. **Otwiera terminal** w katalogu repo
@@ -31,7 +44,7 @@ Ten projekt jest prowadzony z agentem AI (Antigravity CLI). Każdy członek zesp
 
 > 💡 **Tip**: Agent rozumie cały kontekst projektu. Wystarczy powiedzieć np. "Zrób issue #12" i on wie co robić.
 
-### 4. Workflow krok po kroku
+### 5. Workflow krok po kroku
 ```
 1. Sprawdź issues:        gh issue list
 2. Przypisz się:          gh issue edit <nr> --add-assignee @me
