@@ -1,0 +1,22 @@
+# Docker
+.docker-data/
+*.log
+
+# Systemowe
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / Edytory
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Inne
+node_modules/
+dist/
+build/
