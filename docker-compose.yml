@@ -15,6 +15,8 @@ services:
       - ./.docker-data/postgres:/var/lib/postgresql/data
       # Automatycznie odpala skrypty SQL z tego folderu przy pierwszym uruchomieniu
       - ./sql/migrations:/docker-entrypoint-initdb.d
+      # Mapuje cały katalog sql do kontenera dla użycia przez skrypty np. seeds
+      - ./sql:/app/sql
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U budget_user -d budget_db"]
