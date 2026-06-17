@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
             reports: [
                 { month: "Styczeń", bal: "+ 1,200 PLN" }, { month: "Luty", bal: "+ 500 PLN" }, 
                 { month: "Marzec", bal: "- 200 PLN" }, { month: "Kwiecień", bal: "+ 2,100 PLN" }
+            ],
+            categories: [
+                { name: "Jedzenie", type: "expense", scope: "global" },
+                { name: "Rachunki", type: "expense", scope: "global" },
+                { name: "Pensja", type: "income", scope: "global" },
+                { name: "Zwierzęta (Pies)", type: "expense", scope: "local" },
+                { name: "Zajęcia Dodatkowe (Dzieci)", type: "expense", scope: "local" }
             ]
         },
         "2": { // Household 2: Konto Studenckie
@@ -61,17 +68,27 @@ document.addEventListener('DOMContentLoaded', () => {
             reports: [
                 { month: "Styczeń", bal: "- 50 PLN" }, { month: "Luty", bal: "+ 10 PLN" }, 
                 { month: "Marzec", bal: "- 100 PLN" }, { month: "Kwiecień", bal: "- 10 PLN" }
+            ],
+            categories: [
+                { name: "Jedzenie", type: "expense", scope: "global" },
+                { name: "Rachunki", type: "expense", scope: "global" },
+                { name: "Pensja", type: "income", scope: "global" },
+                { name: "Rozrywka (Kluby)", type: "expense", scope: "local" },
+                { name: "Kieszonkowe", type: "income", scope: "local" },
+                { name: "Materiały na studia", type: "expense", scope: "local" }
             ]
         }
     };
 
+    let currentHouseholdId = '1';
+
     // RENDER LOGIC
-    function renderApp(householdId) {
-        const data = dbMock[householdId];
+    function renderApp() {
+        const data = dbMock[currentHouseholdId];
         
         // Header
         document.getElementById('sidebarName').innerText = data.name;
-        document.getElementById('currentRlsVar').innerText = householdId;
+        document.getElementById('currentRlsVar').innerText = currentHouseholdId;
         
         // Pulpit Overview
         document.getElementById('monthlyBalance').innerText = data.balance;
@@ -163,6 +180,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         });
+
+        // Categories View
+        const catContainer = document.getElementById('categoriesContainer');
+        catContainer.innerHTML = '';
+        data.categories.forEach(c => {
+            catContainer.innerHTML += `
+                <div class="cat-item ${c.scope}">
+                    <div>
+                        <strong style="font-size:1.1rem; margin-right:10px;">${c.name}</strong>
+                        <span style="color:var(--text-muted); font-size:0.85rem;">[${c.type === 'income' ? 'Przychód' : 'Wydatek'}]</span>
+                    </div>
+                    <div class="cat-badge ${c.scope}">${c.scope === 'global' ? 'SYSTEMOWA' : 'LOKALNA'}</div>
+                </div>
+            `;
+        });
         
         // Reset Alerts
         document.getElementById('budgetAlert').style.display = 'none';
@@ -171,11 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // SELECTOR LISTENER (Symulacja RLS)
     document.getElementById('householdSelector').addEventListener('change', (e) => {
-        renderApp(e.target.value);
+        currentHouseholdId = e.target.value;
+        renderApp();
     });
 
     // INITIAL RENDER
-    renderApp('1');
+    renderApp();
 
     // MOCK ADD EXPENSE
     const modal = document.getElementById('expenseModal');
@@ -200,13 +233,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('budgetAlert').style.display = 'flex';
                 document.getElementById('alertMessage').innerText = `Wydatki w kategorii "${cat}" przekroczyły bezpieczny próg zaplanowanego budżetu!`;
                 document.getElementById('alertBadge').innerText = '1';
-                // Dodaj też element migania animacji
                 document.getElementById('budgetAlert').style.animation = 'none';
                 setTimeout(() => document.getElementById('budgetAlert').style.animation = '', 10);
             } else {
                 alert("Wpis wprowadzony do tabeli. Brak alertów z bazy.");
             }
         }, 600);
+    });
+
+    // MOCK ADD CATEGORY
+    const catModal = document.getElementById('categoryModal');
+    document.getElementById('addCategoryBtn').addEventListener('click', () => catModal.classList.add('active'));
+    document.getElementById('closeCatModalBtn').addEventListener('click', () => catModal.classList.remove('active'));
+
+    document.getElementById('categoryForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const catName = document.getElementById('formCatName').value;
+        const catType = document.getElementById('formCatType').value;
+        const btn = document.querySelector('#categoryForm button');
+        
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Wykonywanie...';
+        
+        setTimeout(() => {
+            catModal.classList.remove('active');
+            btn.innerHTML = 'INSERT INTO categories';
+            document.getElementById('categoryForm').reset();
+            
+            // Dopisz do struktury i wyrenderuj ponownie
+            dbMock[currentHouseholdId].categories.push({
+                name: catName,
+                type: catType,
+                scope: "local"
+            });
+            renderApp();
+            
+        }, 500);
     });
 
     // MOCK PROCEDURE

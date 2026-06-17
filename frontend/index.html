@@ -33,6 +33,7 @@
             <nav class="nav-menu">
                 <button class="nav-item active" data-target="view-dashboard"><i class="fa-solid fa-chart-pie"></i> Pulpit</button>
                 <button class="nav-item" data-target="view-transactions"><i class="fa-solid fa-money-bill-transfer"></i> Transakcje</button>
+                <button class="nav-item" data-target="view-categories"><i class="fa-solid fa-tags"></i> Kategorie (Słownik)</button>
                 <button class="nav-item" data-target="view-goals"><i class="fa-solid fa-piggy-bank"></i> Cele Oszczędnościowe</button>
                 <button class="nav-item" data-target="view-reports"><i class="fa-solid fa-chart-line"></i> Raporty (v_yearly)</button>
             </nav>
@@ -155,6 +156,21 @@
                 </div>
             </div>
 
+            <!-- ================= WIDOK KATEGORIE ================= -->
+            <div id="view-categories" class="view-section">
+                <div class="glass-panel" style="padding: 24px;">
+                    <div class="panel-header">
+                        <h2>Słownik Kategorii (Drzewo z bazy)</h2>
+                        <button class="btn-primary" id="addCategoryBtn" style="padding: 8px 16px; font-size: 0.85rem;"><i class="fa-solid fa-plus"></i> Nowa Kategoria</button>
+                    </div>
+                    <p class="subtitle mb-2">Prezentacja struktury z tabeli categories. Widzisz kategorie globalne (systemowe) oraz zdefiniowane przez Twoje gospodarstwo domowe.</p>
+                    
+                    <div id="categoriesContainer" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                        <!-- JS fill -->
+                    </div>
+                </div>
+            </div>
+
             <!-- ================= WIDOK CELE ================= -->
             <div id="view-goals" class="view-section">
                 <div class="glass-panel" style="padding: 24px;">
@@ -219,6 +235,32 @@
                         <input type="text" id="formDesc" placeholder="Np. Zakup biletów">
                     </div>
                     <button type="submit" class="btn-primary w-100">INSERT INTO expenses...</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2>Dodaj nową Kategorię</h2>
+                <button class="close-btn" id="closeCatModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="subtitle" style="margin-bottom: 15px;">Zostanie dopisana jako kategoria lokalna (household_id powiązane z Twoją sesją).</p>
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label>Nazwa kategorii</label>
+                        <input type="text" id="formCatName" placeholder="Np. Zwierzęta" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Typ księgowy</label>
+                        <select id="formCatType" required>
+                            <option value="expense">Wydatek</option>
+                            <option value="income">Przychód</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary w-100">INSERT INTO categories</button>
                 </form>
             </div>
         </div>
