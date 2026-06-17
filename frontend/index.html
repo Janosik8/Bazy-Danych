@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baza Budżetu | Pulpit</title>
+    <title>Baza Budżetu | Aplikacja</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,22 +19,26 @@
         <!-- Pasek Boczny (Sidebar) -->
         <aside class="sidebar glass-panel">
             <div class="user-profile">
-                <img src="assets/avatar.jpg" alt="Jan Kowalski" class="avatar">
+                <img src="assets/avatar.jpg" alt="Avatar" class="avatar" id="sidebarAvatar">
                 <div class="user-info">
-                    <h2>Jan Kowalski</h2>
-                    <p>Rodzina Kowalskich</p>
+                    <h2 id="sidebarName">Jan Kowalski</h2>
+                    <select id="householdSelector" class="household-select">
+                        <option value="1">Rodzina Kowalskich (ID: 1)</option>
+                        <option value="2">Konto Studenckie (ID: 2)</option>
+                    </select>
+                    <p style="font-size: 0.7rem; color: var(--success); margin-top: 4px;"><i class="fa-solid fa-shield-halved"></i> Symulacja RLS włączona</p>
                 </div>
             </div>
             
             <nav class="nav-menu">
                 <button class="nav-item active" data-target="view-dashboard"><i class="fa-solid fa-chart-pie"></i> Pulpit</button>
                 <button class="nav-item" data-target="view-transactions"><i class="fa-solid fa-money-bill-transfer"></i> Transakcje</button>
-                <button class="nav-item" data-target="view-goals"><i class="fa-solid fa-piggy-bank"></i> Cele i Budżety</button>
-                <button class="nav-item" data-target="view-reports"><i class="fa-solid fa-chart-line"></i> Raporty</button>
+                <button class="nav-item" data-target="view-goals"><i class="fa-solid fa-piggy-bank"></i> Cele Oszczędnościowe</button>
+                <button class="nav-item" data-target="view-reports"><i class="fa-solid fa-chart-line"></i> Raporty (v_yearly)</button>
             </nav>
 
             <div class="sidebar-footer">
-                <button class="nav-item" data-target="view-settings"><i class="fa-solid fa-gear"></i> Ustawienia</button>
+                <button class="nav-item" data-target="view-settings"><i class="fa-solid fa-gear"></i> Opcje Bazy</button>
             </div>
         </aside>
 
@@ -44,131 +48,144 @@
             <header class="top-bar">
                 <div class="search-bar glass-panel">
                     <i class="fa-solid fa-search"></i>
-                    <input type="text" placeholder="Szukaj transakcji lub kategorii...">
+                    <input type="text" placeholder="Wyszukaj w bazie (np. wydatki na paliwo)...">
                 </div>
                 <div class="actions">
                     <button class="btn-notification" aria-label="Powiadomienia">
                         <i class="fa-regular fa-bell"></i>
-                        <span class="badge">1</span>
+                        <span class="badge" id="alertBadge">0</span>
                     </button>
-                    <button class="btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Dodaj Wydatek</button>
+                    <button class="btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Dodaj Wydatek (INSERT)</button>
                 </div>
             </header>
 
             <!-- ================= WIDOK PULPITU ================= -->
             <div id="view-dashboard" class="view-section active">
-                <div class="alert-banner glass-panel danger-glow" id="budgetAlert">
-                <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                <div class="alert-text">
-                    <strong>Wyzwalacz bazy danych zadziałał!</strong>
-                    <p>Wydatki w kategorii "Wakacje" przekroczyły ustalony próg 80% zaplanowanego budżetu (trg_check_budget_alert).</p>
+                <div class="alert-banner glass-panel danger-glow" id="budgetAlert" style="display: none;">
+                    <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="alert-text">
+                        <strong>Wyzwalacz (Trigger) PL/pgSQL zadziałał!</strong>
+                        <p id="alertMessage">Przekroczono zaplanowany próg 80% na wybraną kategorię (trg_check_budget_alert).</p>
+                    </div>
                 </div>
+
+                <section class="overview-cards">
+                    <div class="card glass-panel card-glow-primary">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-wallet"></i> Saldo Zależne od RLS</h3>
+                        </div>
+                        <div class="card-body">
+                            <h1 class="amount positive" id="monthlyBalance">0.00 PLN</h1>
+                            <p class="subtitle">Z widoku v_monthly_balance WHERE household_id = ?</p>
+                        </div>
+                    </div>
+
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Statystyki Bazy</h3>
+                        </div>
+                        <div class="card-body flow-stats">
+                            <div class="stat">
+                                <span class="label">Suma Przychodów</span>
+                                <span class="value income" id="totalIncomes">0 PLN</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Suma Wydatków</span>
+                                <span class="value expense" id="totalExpenses">0 PLN</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card glass-panel">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-bolt"></i> Operacje Automatyczne</h3>
+                        </div>
+                        <div class="card-body" style="display:flex; flex-direction:column; gap: 15px; justify-content:center; height: 100%;">
+                            <button class="btn-secondary w-100" id="callProcedureBtn" style="padding: 15px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: white; cursor: pointer;">
+                                <i class="fa-solid fa-clock"></i> CALL proc_process_recurring()
+                            </button>
+                            <p class="subtitle" style="text-align: center;">Wymuś naliczenie abonamentów z tabeli recurring_transactions</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bottom-section" style="margin-top: 24px;">
+                    <div class="transactions-panel glass-panel">
+                        <div class="panel-header">
+                            <h2>Ostatnie (TOP 3) Wydatki</h2>
+                            <button class="btn-text">SELECT * FROM expenses LIMIT 3</button>
+                        </div>
+                        <ul class="transaction-list" id="transactionList"></ul>
+                    </div>
+
+                    <div class="budgets-panel glass-panel">
+                        <div class="panel-header">
+                            <h2>Zużycie Budżetów (v_budget_utilization)</h2>
+                        </div>
+                        <div class="budget-list" id="budgetList"></div>
+                    </div>
+                </section>
             </div>
-
-            <section class="overview-cards">
-                <!-- Saldo Miesiąca -->
-                <div class="card glass-panel card-glow-primary">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-wallet"></i> Saldo (Czerwiec)</h3>
-                    </div>
-                    <div class="card-body">
-                        <h1 class="amount positive" id="monthlyBalance">+ 2,450.00 PLN</h1>
-                        <p class="subtitle">Pobrano z v_monthly_balance</p>
-                    </div>
-                </div>
-
-                <!-- Przychody / Wydatki -->
-                <div class="card glass-panel">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Przepływ</h3>
-                    </div>
-                    <div class="card-body flow-stats">
-                        <div class="stat">
-                            <span class="label">Przychody</span>
-                            <span class="value income">8,500 PLN</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">Wydatki</span>
-                            <span class="value expense">6,050 PLN</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Postęp Celu -->
-                <div class="card glass-panel">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-car"></i> Cel: Nowy Samochód</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="progress-info">
-                            <span class="progress-val" id="goalProgress">31.25%</span>
-                            <span class="progress-target">15,000 / 48,000 PLN</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-fill" style="width: 31.25%;"></div>
-                        </div>
-                        <p class="subtitle mt-1">Wyliczono fn_calculate_goal_progress(1)</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="bottom-section">
-                <!-- Ostatnie Transakcje -->
-                <div class="transactions-panel glass-panel">
-                    <div class="panel-header">
-                        <h2>Ostatnie Transakcje</h2>
-                        <button class="btn-text">Zobacz wszystkie</button>
-                    </div>
-                    <ul class="transaction-list" id="transactionList">
-                        <!-- Lista ładowana z JS -->
-                    </ul>
-                </div>
-
-                <!-- Użycie budżetu -->
-                <div class="budgets-panel glass-panel">
-                    <div class="panel-header">
-                        <h2>Wykorzystanie Budżetu</h2>
-                    </div>
-                    <div class="budget-list" id="budgetList">
-                        <!-- Budżety ładowane z JS -->
-                    </div>
-                </div>
-            </section>
-            </div> <!-- End view-dashboard -->
 
             <!-- ================= WIDOK TRANSAKCJE ================= -->
             <div id="view-transactions" class="view-section">
-                <div class="glass-panel" style="padding: 40px; text-align: center;">
-                    <h2><i class="fa-solid fa-money-bill-transfer" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i></h2>
-                    <h2>Wszystkie Transakcje</h2>
-                    <p class="subtitle mt-1">Tutaj pojawi się pełna tabela wydatków i przychodów na bazie widoku v_category_expenses.</p>
+                <div class="glass-panel" style="padding: 24px;">
+                    <div class="panel-header">
+                        <h2>Tabela `expenses` & `incomes` (Połączenie RLS)</h2>
+                        <div class="search-bar" style="border: 1px solid var(--glass-border); width: 250px;">
+                            <i class="fa-solid fa-filter"></i>
+                            <input type="text" placeholder="Filtruj tabelę...">
+                        </div>
+                    </div>
+                    <table class="db-table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--glass-border); color: var(--text-muted); text-align: left;">
+                                <th style="padding: 12px;">ID</th>
+                                <th style="padding: 12px;">Data</th>
+                                <th style="padding: 12px;">Typ</th>
+                                <th style="padding: 12px;">Kategoria</th>
+                                <th style="padding: 12px;">Opis</th>
+                                <th style="padding: 12px; text-align: right;">Kwota</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullTransactionsTable">
+                            <!-- JS fill -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- ================= WIDOK CELE I BUDŻETY ================= -->
+            <!-- ================= WIDOK CELE ================= -->
             <div id="view-goals" class="view-section">
-                <div class="glass-panel" style="padding: 40px; text-align: center;">
-                    <h2><i class="fa-solid fa-piggy-bank" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i></h2>
-                    <h2>Zarządzanie Budżetem</h2>
-                    <p class="subtitle mt-1">Panel do dodawania nowych celów oszczędnościowych i alertów.</p>
+                <div class="glass-panel" style="padding: 24px;">
+                    <h2>Tabela `savings_goals`</h2>
+                    <p class="subtitle mb-2">Symulacja działania funkcji fn_calculate_goal_progress(id)</p>
+                    <div id="goalsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <!-- JS fill -->
+                    </div>
                 </div>
             </div>
 
             <!-- ================= WIDOK RAPORTY ================= -->
             <div id="view-reports" class="view-section">
-                <div class="glass-panel" style="padding: 40px; text-align: center;">
-                    <h2><i class="fa-solid fa-chart-line" style="font-size: 3rem; color: var(--success); margin-bottom: 20px;"></i></h2>
-                    <h2>Raporty i Prognozy</h2>
-                    <p class="subtitle mt-1">Wizualizacje analityczne na bazie widoku materializowanego mv_yearly_summary.</p>
+                <div class="glass-panel" style="padding: 24px;">
+                    <h2>Widok zmaterializowany `mv_yearly_summary`</h2>
+                    <p class="subtitle mb-2">Poniżej dane zagregowane per miesiąc w roku dla aktywnego household_id.</p>
+                    <div class="report-grid" id="reportsGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px;">
+                        <!-- JS fill -->
+                    </div>
                 </div>
             </div>
 
             <!-- ================= WIDOK USTAWIENIA ================= -->
             <div id="view-settings" class="view-section">
                 <div class="glass-panel" style="padding: 40px; text-align: center;">
-                    <h2><i class="fa-solid fa-gear" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 20px;"></i></h2>
-                    <h2>Ustawienia Konta</h2>
-                    <p class="subtitle mt-1">Zmiana hasła, edycja awatara i ustawienia RLS gospodarstwa domowego.</p>
+                    <h2><i class="fa-solid fa-server" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 20px;"></i></h2>
+                    <h2>Zarządzanie Sesją PostgreSQL</h2>
+                    <p class="subtitle mt-1">
+                        Obecnie w sesji bazy przypisano zmienną:<br>
+                        <code style="background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; display:inline-block; margin-top: 10px; color: var(--accent);">SET app.current_household_id = '<span id="currentRlsVar">1</span>';</code>
+                    </p>
                 </div>
             </div>
 
@@ -179,29 +196,29 @@
     <div class="modal-overlay" id="expenseModal">
         <div class="modal glass-panel">
             <div class="modal-header">
-                <h2>Nowy Wydatek</h2>
+                <h2>Symulacja INSERT (SQL)</h2>
                 <button class="close-btn" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
+                <p class="subtitle" style="margin-bottom: 15px;">Ten formularz wygeneruje polecenie dodające wiersz do tabeli expenses. Może aktywować Triggera!</p>
                 <form id="expenseForm">
                     <div class="form-group">
                         <label>Kwota (PLN)</label>
-                        <input type="number" step="0.01" placeholder="0.00" required>
+                        <input type="number" step="0.01" id="formAmount" placeholder="100.00" required>
                     </div>
                     <div class="form-group">
-                        <label>Kategoria</label>
-                        <select required>
-                            <option>Jedzenie</option>
-                            <option>Transport</option>
-                            <option>Rachunki</option>
-                            <option>Wakacje</option>
+                        <label>Kategoria (ID)</label>
+                        <select id="formCategory" required>
+                            <option value="Wakacje">Wakacje (Zbudżetowane)</option>
+                            <option value="Jedzenie">Jedzenie</option>
+                            <option value="Rozrywka">Rozrywka</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Opis</label>
-                        <input type="text" placeholder="Za co zapłacono?">
+                        <label>Opis wydatku</label>
+                        <input type="text" id="formDesc" placeholder="Np. Zakup biletów">
                     </div>
-                    <button type="submit" class="btn-primary w-100">Zapisz do bazy</button>
+                    <button type="submit" class="btn-primary w-100">INSERT INTO expenses...</button>
                 </form>
             </div>
         </div>

@@ -602,3 +602,47 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
+
+/* Nowe dodatki dla bogatych tabel i layoutu */
+.household-select {
+    background: rgba(0,0,0,0.3);
+    color: var(--text-main);
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    padding: 4px;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+.household-select option {
+    background: var(--bg-darker);
+}
+
+.db-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+}
+.db-table tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+.db-table td {
+    padding: 12px;
+}
+
+.report-grid .report-card {
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+}
+.report-card h4 { color: var(--text-muted); margin-bottom: 10px; font-weight: 500;}
+.report-card .bal { font-size: 1.2rem; font-weight: 700; color: var(--success); }
+.mb-2 { margin-bottom: 15px; }
+
+.btn-secondary:hover {
+    background: rgba(139, 92, 246, 0.2) !important;
+}
+
