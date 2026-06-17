@@ -1,55 +1,46 @@
 # Raport Końcowy - Aplikacja do zarządzania budżetem domowym
 
-Niniejszy raport stanowi podsumowanie i dokumentację końcową projektu zaliczeniowego z przedmiotu Bazy Danych. Projekt odzwierciedla pełny cykl życia systemu: od analizy, przez normalizację i implementację, po zabezpieczenia i interfejs GUI.
+Poniżej znajduje się podsumowanie naszego projektu zaliczeniowego z przedmiotu Bazy Danych. Projekt został pomyślany tak, żeby pokazać wszystkie etapy pracy z bazą: od analizy i wymyślenia struktury, przez pisanie zapytań i funkcji, po dodanie ról, uprawnień i transakcji.
 
-Projekt został skrupulatnie przygotowany z myślą o spełnieniu wymagań na **ocenę 4.5**.
+Wszystkie kody źródłowe podzieliliśmy na wygodne foldery w repozytorium.
 
 ---
 
-## 1. Architektura i Normalizacja (3NF)
-Cała struktura naszej bazy danych została zaprojektowana w Trzeciej Postaci Normalnej (3NF). 
-Wyeliminowano redundancje oraz częściowe czy przechodnie zależności. Klucze obce (FK) rygorystycznie pilnują spójności powiązań pomiędzy użytkownikami, wydatkami, kategoriami czy budżetami.
+## 1. Struktura i Tabele (Normalizacja do 3NF)
+Cała baza została zaprojektowana zgodnie z zasadami Trzeciej Postaci Normalnej (3NF). Pozbyliśmy się powtarzających się danych, a relacje (klucze obce) trzymają wszystko w ryzach – np. nie da się przypisać wydatku do nieistniejącego użytkownika.
+* **Tutaj tworzymy tabele**: `sql/migrations/001_create_schema.sql` 
+* **Diagram bazy (ERD)**: Można go zobaczyć w pliku `docs/erd.md`
 
-* **Lokalizacja w repozytorium**: `sql/migrations/001_create_schema.sql` (definicja tabel i kluczy obcych)
-* **Dokumentacja schematu**: `docs/erd.md` (diagram ERD i opis encji)
+## 2. Zapytania i Widoki (Views)
+Zamiast pisać trudne i długie zapytania (z dużą liczbą JOINów) bezpośrednio w zewnętrznej aplikacji, zrobiliśmy sobie wygodne widoki bezpośrednio w bazie. Wykorzystaliśmy też widok zmaterializowany, który bardzo przyspiesza liczenie rocznych podsumowań na dużych zbiorach danych.
+* **Zwykłe widoki**: `sql/views/01_core_views.sql` (np. wygodne podsumowanie wydatków w miesiącu)
+* **Widoki zmaterializowane**: `sql/views/02_materialized_views.sql`
 
-## 2. Zaawansowane zapytania SQL i Widoki (Views)
-Wykorzystano zaawansowane mechanizmy łączenia tabel, w tym agregacje i zapytania zagnieżdżone. Aplikacja opiera swój przepływ danych na dedykowanych widokach, w tym na **widoku zmaterializowanym**.
+## 3. Procedury i Wyzwalacze (PL/pgSQL)
+Napisaliśmy własne funkcje w PL/pgSQL, żeby zautomatyzować działanie bazy, żeby nie trzeba było wszystkiego robić i pilnować ręcznie:
+* **Procedury**: Mamy procedurę, która na żądanie automatycznie nalicza stałe abonamenty i subskrypcje w danym miesiącu (`sql/procedures/01_process_recurring_transactions.sql`).
+* **Wyzwalacze (Triggers)**: 
+  * Wyzwalacz automatycznie aktualizujący datę edycji wiersza w kolumnie `updated_at` (`sql/triggers/01_updated_at_triggers.sql`).
+  * Wyzwalacz, który od razu sprawdza podczas dodawania wydatku, czy nie wydaliśmy za dużo na daną kategorię i wstawia specjalny alert (`sql/triggers/02_budget_alert_trigger.sql`).
 
-* **Lokalizacja widoków standardowych**: `sql/views/01_core_views.sql` (m.in. `v_monthly_balance`, `v_category_expenses`)
-* **Widoki Zmaterializowane**: `sql/views/02_materialized_views.sql` (np. `mv_yearly_summary` wymagający periodycznego odświeżania)
+## 4. Transakcje i Izolacja
+Zadbaliśmy też o bezpieczeństwo spójności operacji, zwłaszcza kiedy wykonuje się dużo zapytań jednocześnie. Przygotowaliśmy plik, w którym pokazujemy jak można używać `READ COMMITTED` oraz `SERIALIZABLE`, żeby zapobiec błędom (np. gdy dwie osoby z rodziny na raz próbują założyć budżet na to samo).
+* **Plik z przykładami transakcji**: `sql/transactions/01_isolation_levels_demo.sql` 
 
-## 3. Logika Proceduralna PL/pgSQL (Procedury i Wyzwalacze)
-Logika biznesowa przeniesiona do warstwy bazy danych poprzez język proceduralny PL/pgSQL:
-* **Procedury Składowane**: Obsługa automatyzacji zadań wieloetapowych. 
-  * `sql/procedures/01_process_recurring_transactions.sql` - automatyzacja naliczania wydatków abonamentowych (cyklicznych).
-* **Wyzwalacze (Triggers)**: Monitorowanie zmian na żywo.
-  * `sql/triggers/01_updated_at_triggers.sql` - wyzwalacz automatycznie uaktualniający kolumnę `updated_at`.
-  * `sql/triggers/02_budget_alert_trigger.sql` - wyzwalacz pilnujący, czy w wyniku `INSERT/UPDATE` nie przekroczono zadanego progu ostrzegawczego budżetu.
-
-## 4. Transakcje i Poziomy Izolacji (Wymaganie na 4.5)
-Projekt świadomie operuje na wieloetapowych zapytaniach zamkniętych w transakcjach. Przygotowano pełną demonstrację pokazującą różnice między transakcjami zapobiegającymi odczytom brudnym (Dirty Reads) i widmom (Phantom Reads), w tym wykorzystanie `SAVEPOINT`.
-
-* **Plik demonstracyjny z transakcjami**: `sql/transactions/01_isolation_levels_demo.sql` 
-
-## 5. Bezpieczeństwo - RBAC i Row Level Security (Wymaganie na 4.5)
-Odeszliśmy od archaicznego schematu `public`. Stworzyliśmy autorski schemat `budget` oraz precyzyjną macierz uprawnień klasy enterprise.
-
-* **RBAC (Role Based Access Control)**: Zdefiniowane 3 role (`budget_admin`, `budget_member`, `budget_viewer`) posiadające restrykcyjne uprawnienia na poziomie GRANT / REVOKE.
-* **RLS (Row Level Security)**: Najpotężniejszy element obronny systemu. Użytkownik nie zobaczy danych innej rodziny nawet wykonując polecenie `SELECT * FROM expenses`. Wymagane jest poświadczenie tożsamości poprzez identyfikator sesyjny.
-* **Lokalizacja w repozytorium**: `sql/security/01_roles_permissions.sql` oraz `sql/security/02_row_level_security.sql`
+## 5. Bezpieczeństwo - Role i Uprawnienia (RBAC i RLS)
+Skonfigurowaliśmy precyzyjnie, kto ma dostęp do jakich danych w systemie:
+* Zrobiliśmy 3 różne role z różnymi prawami zapisu i odczytu (Admin, Member, Viewer) w pliku `sql/security/01_roles_permissions.sql`.
+* Użyliśmy mechanizmu **Row Level Security (RLS)**. Dzięki temu zalogowany użytkownik widzi wyłącznie wydatki swojego własnego gospodarstwa domowego, a baza danych sama ucina i ukrywa przed nim resztę wyników z innych domów: `sql/security/02_row_level_security.sql`.
 
 ## 6. Przewodniki i Interfejs Użytkownika
-Oprócz twardej logiki SQL stworzono dla systemu ułatwienia prezentacyjne:
-* **Interfejs GUI**: Prosty (Vanilla HTML/CSS/JS), ale estetyczny interfejs symulujący obsługę logiki bazodanowej. Umieszczony w katalogu `frontend/`. 
-* **Dokumentacja Onboardingowa**: Przewodnik krok po kroku po środowisku: `docs/onboarding.md`
-* **Słownik Pojęć**: `docs/glossary.md`
+Oprócz czystego kodu SQL, dla pokazania efektów stworzyliśmy:
+* **Frontend**: Prosty interfejs graficzny w HTML/JS, który symuluje podpięcie do naszej bazy i odpytywanie widoków (`frontend/`).
+* **Instrukcję testowania**: Opis krok po kroku, jak postawić bazę i przetestować wszystkie jej funkcjonalności (znajduje się w `docs/onboarding.md`).
 
 ---
 
-### Instrukcja Uruchomienia dla Prowadzącego
-1. Sklonuj repozytorium.
-2. Wejdź do głównego katalogu z plikiem `docker-compose.yml`.
-3. Wykonaj `docker-compose up -d`.
-4. Gotowe! Baza danych ładuje w pełni poprawną architekturę, wszystkie funkcje, RLS, widoki zmaterializowane oraz wstrzykuje dane testowe (z katalogu `sql/seed`).
-5. (Opcjonalnie) Otwórz w przeglądarce `frontend/index.html` aby zobaczyć symulację interfejsu.
+### Jak uruchomić projekt do sprawdzenia?
+1. Sklonuj repozytorium na swój dysk.
+2. Otwórz terminal w głównym folderze i wpisz komendę `docker-compose up -d`.
+3. Baza automatycznie się zbuduje, poukłada tabele i załaduje wszystkie powyższe skrypty oraz wstrzyknie dane testowe (można je podejrzeć w katalogu `sql/seed/`).
+4. Gotowe, można wejść do kontenera i wpisywać własne kwerendy!
