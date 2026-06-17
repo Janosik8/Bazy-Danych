@@ -11,8 +11,6 @@ Aplikacja do zarządzania budżetem domowym. Projekt na przedmiot Bazy Danych (s
 
 ### 1. Zainstaluj narzędzia
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) - do uruchomienia bazy lokalnie
-- [Antigravity CLI](https://github.com/google-gemini/antigravity-cli) - nasz agent AI
-- [GitHub CLI](https://cli.github.com/) - do zarządzania issues z terminala
 
 ### 2. Sklonuj repo
 ```bash
