@@ -6,7 +6,8 @@ Poniżej znajduje się podsumowanie projektu zaliczeniowego z przedmiotu Bazy Da
 
 ## 1. Podstawowe funkcjonalności i schemat bazy (Normalizacja 2NF i 3NF)
 Cała struktura bazy danych została zaprojektowana od podstaw, tak aby w pełni funkcjonowała i przechowywała powiązane dane dotyczące budżetów, wydatków i celów oszczędnościowych. Schemat bazy spełnia zasady normalizacji – doprowadzono go do Trzeciej Postaci Normalnej (3NF), eliminując powtarzające się dane i zapewniając poprawność relacji (kluczy obcych).
-* **Definicja tabel i struktury**: `sql/migrations/001_create_schema.sql`
+* **Definicja tabel i struktury**: `sql/migrations/001_initial_schema.sql`
+* **Kolejne tabele systemu**: `sql/migrations/002_categories.sql`, `003_transactions.sql`, `004_budgets.sql`
 * **Dane testowe potwierdzające działanie**: Wszystkie pliki w katalogu `sql/seed/`
 
 ## 2. Dokumentacja techniczna i użytkowa (w tym ERD)
@@ -18,13 +19,14 @@ Przygotowano odpowiednią dokumentację opisującą działanie bazy, definicje, 
 
 ## 3. Rozbudowana funkcjonalność (zaawansowane zapytania i widoki)
 Aby ułatwić i usprawnić odpytywanie bazy z zewnątrz, utworzono zaawansowane zapytania z zagnieżdżeniami pod postacią widoków. 
-* **Zwykłe widoki (agregacje, sumowanie)**: `sql/views/01_core_views.sql`
-* **Widoki zmaterializowane (raporty roczne)**: `sql/views/02_materialized_views.sql`
+* **Zwykłe widoki (agregacje, sumowanie)**: `sql/views/01_v_monthly_balance.sql`, `sql/views/02_v_category_expenses.sql`, `sql/views/03_v_budget_utilization.sql`
+* **Widoki zmaterializowane (raporty roczne)**: `sql/views/04_v_yearly_summary.sql`
 
 ## 4. Wyzwalacze, procedury i funkcje (PL/pgSQL)
 Napisano dedykowane skrypty w języku proceduralnym PL/pgSQL, które automatyzują pracę wewnątrz systemu PostgreSQL:
 * **Procedura do transakcji cyklicznych**: `sql/procedures/01_process_recurring_transactions.sql`
 * **Wyzwalacz (Trigger) do alertów budżetowych**: `sql/triggers/02_budget_alert_trigger.sql` (dynamicznie reaguje na instrukcje INSERT)
+* **Wyzwalacz dat modyfikacji**: `sql/triggers/01_updated_at_triggers.sql`
 * **Funkcje narzędziowe**: `sql/functions/01_utility_functions.sql`
 
 ## 5. Mechanizmy transakcyjne i poziomy izolacji
