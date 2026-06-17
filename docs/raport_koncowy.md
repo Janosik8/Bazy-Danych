@@ -1,46 +1,44 @@
 # Raport Końcowy - Aplikacja do zarządzania budżetem domowym
 
-Poniżej znajduje się podsumowanie projektu zaliczeniowego z przedmiotu Bazy Danych. Projekt odzwierciedla wszystkie etapy pracy z systemem bazodanowym: od analizy i przygotowania struktury, przez pisanie zapytań i funkcji, po dodanie ról, uprawnień i transakcji.
-
-Wszystkie kody źródłowe podzielono na odpowiednie foldery w repozytorium.
+Poniżej znajduje się podsumowanie projektu zaliczeniowego z przedmiotu Bazy Danych. Projekt odzwierciedla wszystkie etapy pracy z systemem bazodanowym i spełnia postawione przed nim kryteria. Poniżej rozpisano, gdzie w repozytorium znajdują się konkretne elementy realizacji.
 
 ---
 
-## 1. Struktura i Tabele (Normalizacja do 3NF)
-Cała baza została zaprojektowana zgodnie z zasadami Trzeciej Postaci Normalnej (3NF). Wyeliminowano powtarzające się dane, a relacje (klucze obce) pilnują spójności – np. nie da się przypisać wydatku do nieistniejącego użytkownika.
-* **Plik z tabelami**: `sql/migrations/001_create_schema.sql` 
-* **Diagram bazy (ERD)**: Zaprezentowano w pliku `docs/erd.md`
+## 1. Podstawowe funkcjonalności i schemat bazy (Normalizacja 2NF i 3NF)
+Cała struktura bazy danych została zaprojektowana od podstaw, tak aby w pełni funkcjonowała i przechowywała powiązane dane dotyczące budżetów, wydatków i celów oszczędnościowych. Schemat bazy spełnia zasady normalizacji – doprowadzono go do Trzeciej Postaci Normalnej (3NF), eliminując powtarzające się dane i zapewniając poprawność relacji (kluczy obcych).
+* **Definicja tabel i struktury**: `sql/migrations/001_create_schema.sql`
+* **Dane testowe potwierdzające działanie**: Wszystkie pliki w katalogu `sql/seed/`
 
-## 2. Zapytania i Widoki (Views)
-Zamiast korzystać z trudnych i długich zapytań bezpośrednio w zewnętrznej aplikacji, utworzono wygodne widoki bezpośrednio w bazie. Wykorzystano również widok zmaterializowany, który bardzo przyspiesza liczenie rocznych podsumowań na dużych zbiorach danych.
-* **Zwykłe widoki**: `sql/views/01_core_views.sql` (np. ułatwiające podsumowanie wydatków w miesiącu)
-* **Widoki zmaterializowane**: `sql/views/02_materialized_views.sql`
+## 2. Dokumentacja techniczna i użytkowa (w tym ERD)
+Przygotowano odpowiednią dokumentację opisującą działanie bazy, definicje, założenia oraz zaprojektowane struktury:
+* **Diagram ERD i opis implementacji encji**: `docs/erd.md`
+* **Dokumentacja użytkowa (Instrukcja testowania)**: `docs/onboarding.md`
+* **Słownik pojęć**: `docs/glossary.md`
+* **Wymagania niefunkcjonalne**: `docs/non-functional-requirements.md`
 
-## 3. Procedury i Wyzwalacze (PL/pgSQL)
-Napisano odpowiednie funkcje w PL/pgSQL, aby zautomatyzować działanie bazy i zmniejszyć ilość ręcznych modyfikacji danych:
-* **Procedury**: Utworzono procedurę, która na żądanie automatycznie nalicza stałe abonamenty i subskrypcje w danym miesiącu (`sql/procedures/01_process_recurring_transactions.sql`).
-* **Wyzwalacze (Triggers)**: 
-  * Wyzwalacz automatycznie aktualizujący datę edycji wiersza w kolumnie `updated_at` (`sql/triggers/01_updated_at_triggers.sql`).
-  * Wyzwalacz, który od razu sprawdza podczas dodawania wydatku, czy nie wydano za dużo na daną kategorię i dodaje specjalny wpis ostrzegawczy (`sql/triggers/02_budget_alert_trigger.sql`).
+## 3. Rozbudowana funkcjonalność (zaawansowane zapytania i widoki)
+Aby ułatwić i usprawnić odpytywanie bazy z zewnątrz, utworzono zaawansowane zapytania z zagnieżdżeniami pod postacią widoków. 
+* **Zwykłe widoki (agregacje, sumowanie)**: `sql/views/01_core_views.sql`
+* **Widoki zmaterializowane (raporty roczne)**: `sql/views/02_materialized_views.sql`
 
-## 4. Transakcje i Izolacja
-Zadbano o bezpieczeństwo spójności operacji, zwłaszcza w przypadkach wykonywania wielu zapytań jednocześnie. Przygotowano plik demonstrujący zastosowanie `READ COMMITTED` oraz `SERIALIZABLE` w celu zapobiegania błędom (np. gdy dwoje użytkowników na raz próbuje założyć budżet na tę samą kategorię).
-* **Plik z przykładami transakcji**: `sql/transactions/01_isolation_levels_demo.sql` 
+## 4. Wyzwalacze, procedury i funkcje (PL/pgSQL)
+Napisano dedykowane skrypty w języku proceduralnym PL/pgSQL, które automatyzują pracę wewnątrz systemu PostgreSQL:
+* **Procedura do transakcji cyklicznych**: `sql/procedures/01_process_recurring_transactions.sql`
+* **Wyzwalacz (Trigger) do alertów budżetowych**: `sql/triggers/02_budget_alert_trigger.sql` (dynamicznie reaguje na instrukcje INSERT)
+* **Funkcje narzędziowe**: `sql/functions/01_utility_functions.sql`
 
-## 5. Bezpieczeństwo - Role i Uprawnienia (RBAC i RLS)
-Precyzyjnie skonfigurowano reguły dostępu do danych w systemie:
-* Utworzono 3 różne role z przypisanymi prawami zapisu i odczytu (Admin, Member, Viewer) w pliku `sql/security/01_roles_permissions.sql`.
-* Wykorzystano mechanizm **Row Level Security (RLS)**. Dzięki niemu zalogowany użytkownik widzi wyłącznie wydatki swojego własnego gospodarstwa domowego, a baza danych automatycznie filtruje i ukrywa przed nim wyniki pochodzące z innych kont: `sql/security/02_row_level_security.sql`.
+## 5. Mechanizmy transakcyjne i poziomy izolacji
+Wdrożono i udokumentowano demonstrację działania bazy w rygorystycznym środowisku transakcyjnym z wykorzystaniem różnych poziomów izolacji (`READ COMMITTED` oraz `SERIALIZABLE`), z uwzględnieniem `SAVEPOINT` i `ROLLBACK`.
+* **Plik demonstrujący mechanizmy transakcyjne**: `sql/transactions/01_isolation_levels_demo.sql`
 
-## 6. Przewodniki i Interfejs Użytkownika
-Oprócz skryptów SQL, w celu wizualizacji działania przygotowano:
-* **Frontend**: Prosty interfejs graficzny w technologiach HTML/JS, który symuluje podpięcie pod bazę i odpytywanie widoków (`frontend/`).
-* **Instrukcję testowania**: Opis krok po kroku, jak poprawnie zainicjować bazę i przetestować jej pełną funkcjonalność (`docs/onboarding.md`).
+## 6. Bezpieczeństwo danych (Role i uprawnienia)
+Precyzyjnie skonfigurowano reguły bezpieczeństwa i odseparowano dostęp do tabel. Utworzono 3 oddzielne role w bazie (Admin, Member, Viewer) i użyto mechanizmów odizolowywania rekordów:
+* **Definicja ról i nadawanie praw (GRANT/REVOKE)**: `sql/security/01_roles_permissions.sql`
+* **Konfiguracja bezpieczeństwa na poziomie wiersza (RLS)**: `sql/security/02_row_level_security.sql`
 
 ---
 
 ### Jak uruchomić projekt do sprawdzenia?
 1. Należy sklonować repozytorium na własny dysk.
 2. Otworzyć terminal w głównym folderze i wpisać komendę `docker-compose up -d`.
-3. Baza automatycznie się zbuduje, stworzy odpowiednie tabele, załaduje wszystkie powyższe skrypty oraz wstrzyknie wstępne dane testowe (zawartość w katalogu `sql/seed/`).
-4. Baza jest gotowa do przyjmowania kwerend testowych.
+3. Baza automatycznie się zbuduje, stworzy odpowiednie tabele, załaduje wszystkie widoki/procedury oraz wstrzyknie do środka dane testowe z sekwencji seedów. W ten sposób projekt jest od razu gotowy do przeglądu.
