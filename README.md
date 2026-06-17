@@ -55,38 +55,13 @@ docker-compose down -v
 docker-compose up -d
 ```
 
-### 4. AI-Driven Workflow
-Ten projekt jest prowadzony z agentem AI (Antigravity CLI). Każdy członek zespołu:
-
-1. **Otwiera terminal** w katalogu repo
-2. **Uruchamia** `agy` (Antigravity CLI)
-3. **Agent automatycznie ładuje kontekst** z `GEMINI.md` - wie co to za projekt
-4. **Bierze issue z GitHub** i mówi agentowi co ma zrobić
-5. Agent tworzy kod, dokumentację, SQL - w odpowiednich katalogach
-
-> 💡 **Tip**: Agent rozumie cały kontekst projektu. Wystarczy powiedzieć np. "Zrób issue #12" i on wie co robić.
-
-### 5. Workflow krok po kroku
-```
-1. Sprawdź issues:        gh issue list
-2. Przypisz się:          gh issue edit <nr> --add-assignee @me
-3. Utwórz branch:         git checkout -b feature/<nr>-opis
-4. Odpal agenta:          agy
-5. Powiedz mu co robić:   "Zrób zadanie z issue #<nr>"
-6. Commit + Push:          git add . && git commit -m "..." && git push
-7. Utwórz PR:             gh pr create
-```
 
 ## 📁 Struktura i Dokumentacja
 ```
 docs/          → Dokumentacja (wymagania, ERD, modele, konwencje)
 sql/           → Cały SQL (migracje, widoki, funkcje, triggery...)
-frontend/      → Prosty frontend
 ```
 
-### Dokumentacja - co czytać?
-- **Dla developera**: Przede wszystkim `docs/requirements.md` (wymagania funkcjonalne) oraz `docs/conventions.md` (konwencje projektowe). Warto też zerknąć na `docs/erd.md` dla ogólnego zarysu struktury oraz na `docs/phases.md` żeby wiedzieć jakie są etapy do zrobienia.
-- **Dla agenta AI**: Agent wykorzystuje wszystkie pliki, ale szczególnie polega na szczegółowych plikach jak `logical-model.md` czy `physical-model.md`, które opisują relacje, typy i 3NF w bazie.
 
 > 💡 **Jak zobaczyć diagram ERD w VS Code?**
 > W pliku `docs/erd.md` użyliśmy formatu **Mermaid**. Aby go zobaczyć jako piękny diagram, zainstaluj wtyczkę do VS Code np. **"Markdown Preview Mermaid Support"** (wtyczka do Mermaid jest natywnie w VSC od wersji 1.121.) lub otwórz plik na GitHubie (który natywnie renderuje Mermaid).
@@ -96,5 +71,3 @@ frontend/      → Prosty frontend
 - @Janosik8 
 - @PawelKowalcze
 
-## 📋 Issues
-Wszystkie zadania są na [GitHub Issues](https://github.com/Janosik8/Bazy-Danych/issues). Bierz po kolei, przypisuj się, rób.
