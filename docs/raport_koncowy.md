@@ -12,14 +12,12 @@ Cała struktura bazy danych została zaprojektowana od podstaw, tak aby w pełni
 
 ## 2. Dokumentacja techniczna i użytkowa (w tym ERD)
 Przygotowano obszerną dokumentację opisującą cały cykl tworzenia bazy, począwszy od wymagań, poprzez modelowanie, po finalne wdrożenie:
-* **Fazy realizacji projektu**: `docs/phases.md`
 * **Wymagania funkcjonalne systemu**: `docs/requirements.md`
 * **Wymagania niefunkcjonalne**: `docs/non-functional-requirements.md`
 * **Słownik pojęć domenowych**: `docs/glossary.md`
 * **Logiczny model danych**: `docs/logical-model.md`
 * **Fizyczny model danych**: `docs/physical-model.md`
 * **Diagram ERD i opis implementacji encji**: `docs/erd.md`
-* **Konwencje nazewnictwa i wytyczne**: `docs/conventions.md`
 * **Dokumentacja użytkowa (Instrukcja testowania i Onboarding)**: `docs/onboarding.md`
 
 ## 3. Rozbudowana funkcjonalność (zaawansowane zapytania i widoki)
