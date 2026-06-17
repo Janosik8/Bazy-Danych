@@ -3,55 +3,25 @@
 ## Spis treści
 
 1. [Wprowadzenie](#wprowadzenie)
-2. [NF-01: Wydajność](#nf-01-wydajność)
-3. [NF-02: Bezpieczeństwo](#nf-02-bezpieczeństwo)
-4. [NF-03: Integralność danych](#nf-03-integralność-danych)
-5. [NF-04: Normalizacja](#nf-04-normalizacja)
-6. [NF-05: Skalowalność](#nf-05-skalowalność)
-7. [NF-06: Audytowalność](#nf-06-audytowalność)
-8. [NF-07: Dostępność](#nf-07-dostępność)
-9. [NF-08: Przenoszalność](#nf-08-przenoszalność)
-10. [Podsumowanie](#podsumowanie)
+2. [NF-01: Bezpieczeństwo](#nf-01-bezpieczeństwo)
+3. [NF-02: Integralność danych](#nf-02-integralność-danych)
+4. [NF-03: Normalizacja](#nf-03-normalizacja)
+5. [NF-04: Audytowalność](#nf-04-audytowalność)
+6. [NF-05: Dostępność](#nf-05-dostępność)
+7. [NF-06: Przenoszalność](#nf-06-przenoszalność)
+8. [Podsumowanie](#podsumowanie)
 
 ---
 
 ## Wprowadzenie
 
-Niniejszy dokument opisuje wymagania niefunkcjonalne systemu zarządzania budżetem domowym. Wymagania te definiują oczekiwane cechy jakościowe bazy danych — w zakresie wydajności, bezpieczeństwa, integralności, normalizacji, skalowalności, audytowalności, dostępności oraz przenoszalności. Każde wymaganie posiada unikalny identyfikator, opis oraz mierzalne kryteria akceptacji.
+Niniejszy dokument opisuje wymagania niefunkcjonalne systemu zarządzania budżetem domowym. Wymagania te definiują oczekiwane cechy jakościowe bazy danych — w zakresie bezpieczeństwa, integralności, normalizacji, audytowalności, dostępności oraz przenoszalności. Każde wymaganie posiada unikalny identyfikator, opis oraz mierzalne kryteria akceptacji.
 
 ---
 
-## NF-01: Wydajność
+## NF-01: Bezpieczeństwo
 
 **Identyfikator:** NF-01
-**Nazwa:** Wydajność zapytań i operacji bazodanowych
-**Priorytet:** Wysoki
-
-### Opis
-
-System musi zapewniać odpowiednio krótkie czasy odpowiedzi dla różnych typów zapytań SQL. Wydajność jest kluczowa dla komfortu użytkowania aplikacji — zarówno przy codziennym przeglądaniu transakcji, jak i przy generowaniu raportów agregacyjnych.
-
-### Kryteria akceptacji
-
-| Metryka | Wartość docelowa | Sposób weryfikacji |
-|---|---|---|
-| Zapytanie `SELECT` na pojedynczej tabeli | < 100 ms | `EXPLAIN ANALYZE` na tabeli z danymi testowymi |
-| Zapytanie z `JOIN` (do 3 tabel) | < 500 ms | `EXPLAIN ANALYZE` na zapytaniu wielotabelowym |
-| Raporty agregacyjne (`GROUP BY`, funkcje okna) | < 2 s | `EXPLAIN ANALYZE` na zapytaniach raportowych |
-| Indeksowanie kolumn kluczowych | 100% pokrycie | Przegląd indeksów w schemacie `budget` |
-
-### Wymagane działania
-
-- Utworzenie indeksów na kolumnach kluczy obcych (`category_id`, `user_id`, `household_id`)
-- Utworzenie indeksów na kolumnach dat (`created_at`, `expense_date`, `income_date`)
-- Utworzenie indeksów na kolumnie `household_id` we wszystkich tabelach, w których występuje
-- Wykorzystanie widoków materializowanych dla często używanych raportów agregacyjnych
-
----
-
-## NF-02: Bezpieczeństwo
-
-**Identyfikator:** NF-02
 **Nazwa:** Bezpieczeństwo dostępu do danych
 **Priorytet:** Wysoki
 
@@ -66,21 +36,20 @@ System musi implementować wielopoziomowy model bezpieczeństwa oparty na rolach
 | Role PostgreSQL | 3 role: `admin`, `household_member`, `viewer` | Przegląd ról w klastrze PostgreSQL |
 | Row Level Security (RLS) | Włączone na wszystkich tabelach z danymi użytkowników | `SELECT relname, relrowsecurity FROM pg_class` |
 | Uprawnienia `GRANT`/`REVOKE` | Skonfigurowane na poziomie tabel i widoków | `\dp` w `psql` dla schematu `budget` |
-| Hashowanie haseł | Realizowane przez rozszerzenie `pgcrypto` | Test funkcji `crypt()` i `gen_salt()` |
+| Bezpieczne przechowywanie | Hashowanie haseł (opcjonalnie) | Mechanizm pgcrypto lub poleganie na warstwie logiki aplikacji |
 
 ### Wymagane działania
 
-- Utworzenie ról: `budget_admin`, `budget_household_member`, `budget_viewer`
+- Utworzenie ról: `budget_admin`, `budget_member`, `budget_viewer`
 - Włączenie RLS (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY`) na tabelach zawierających dane gospodarstw
 - Definiowanie polityk RLS filtrujących po `household_id`
 - Konfiguracja uprawnień `GRANT SELECT` dla roli `viewer`, `GRANT SELECT, INSERT, UPDATE, DELETE` dla roli `household_member`
-- Instalacja rozszerzenia `pgcrypto` i użycie funkcji `crypt()` do hashowania haseł
 
 ---
 
-## NF-03: Integralność danych
+## NF-02: Integralność danych
 
-**Identyfikator:** NF-03
+**Identyfikator:** NF-02
 **Nazwa:** Integralność i spójność danych
 **Priorytet:** Wysoki
 
@@ -100,16 +69,15 @@ Baza danych musi gwarantować integralność danych na poziomie schematu poprzez
 ### Wymagane działania
 
 - Dodanie `CHECK (amount > 0)` do tabel `expenses` i `incomes`
-- Dodanie `CHECK (threshold BETWEEN 0 AND 100)` do tabel z progami alertów
 - Ustawienie `ON DELETE CASCADE` dla relacji podrzędnych (np. transakcje użytkownika)
 - Ustawienie `ON DELETE RESTRICT` dla relacji, gdzie usunięcie rekordu nadrzędnego powinno być zablokowane (np. kategorie z przypisanymi wydatkami)
 - Dodanie `UNIQUE` na kolumnach wymagających unikalności (np. adres e-mail użytkownika)
 
 ---
 
-## NF-04: Normalizacja
+## NF-03: Normalizacja
 
-**Identyfikator:** NF-04
+**Identyfikator:** NF-03
 **Nazwa:** Normalizacja struktury bazy danych
 **Priorytet:** Wysoki
 
@@ -135,36 +103,9 @@ Wszystkie tabele w schemacie `budget` muszą być znormalizowane do trzeciej pos
 
 ---
 
-## NF-05: Skalowalność
+## NF-04: Audytowalność
 
-**Identyfikator:** NF-05
-**Nazwa:** Skalowalność bazy danych
-**Priorytet:** Średni
-
-### Opis
-
-System powinien być przygotowany na wzrost ilości danych w czasie. Tabele transakcyjne (`expenses`, `incomes`) mogą rosnąć znacząco — szczególnie w gospodarstwach domowych z wieloma członkami. Mechanizmy takie jak partycjonowanie, widoki materializowane i indeksy powinny zapewniać stabilną wydajność niezależnie od rozmiaru danych.
-
-### Kryteria akceptacji
-
-| Metryka | Wartość docelowa | Sposób weryfikacji |
-|---|---|---|
-| Partycjonowanie tabel transakcyjnych | Opcjonalnie — wg roku (`PARTITION BY RANGE`) | Przegląd definicji tabel |
-| Widoki materializowane | Utworzone dla raportów agregacyjnych | `\dm` w `psql` |
-| Indeksy na kolumnach filtrowanych | Pokrycie wszystkich kolumn używanych w `WHERE` i `JOIN` | `\di` w `psql` |
-
-### Wymagane działania
-
-- Rozważenie partycjonowania tabel `expenses` i `incomes` według roku (`expense_date`, `income_date`)
-- Utworzenie widoków materializowanych dla raportów miesięcznych i rocznych
-- Okresowe odświeżanie widoków materializowanych (`REFRESH MATERIALIZED VIEW`)
-- Dodanie indeksów na wszystkich kolumnach występujących w klauzulach `WHERE` i `JOIN`
-
----
-
-## NF-06: Audytowalność
-
-**Identyfikator:** NF-06
+**Identyfikator:** NF-04
 **Nazwa:** Audytowalność zmian w danych
 **Priorytet:** Średni
 
@@ -185,14 +126,14 @@ System musi umożliwiać śledzenie, kiedy dane zostały utworzone i ostatnio zm
 
 - Dodanie kolumny `created_at TIMESTAMPTZ DEFAULT NOW()` do każdej tabeli
 - Dodanie kolumny `updated_at TIMESTAMPTZ DEFAULT NOW()` do tabel, w których rekordy mogą być modyfikowane
-- Utworzenie funkcji PL/pgSQL `budget.update_updated_at()` ustawiającej `NEW.updated_at = NOW()`
+- Utworzenie funkcji PL/pgSQL ustawiającej `NEW.updated_at = NOW()`
 - Utworzenie wyzwalaczy `BEFORE UPDATE` wywołujących tę funkcję na odpowiednich tabelach
 
 ---
 
-## NF-07: Dostępność
+## NF-05: Dostępność
 
-**Identyfikator:** NF-07
+**Identyfikator:** NF-05
 **Nazwa:** Dostępność i niezawodność systemu
 **Priorytet:** Średni
 
@@ -207,21 +148,18 @@ System musi zapewniać niezawodny dostęp do danych oraz spójność operacji ws
 | Właściwości ACID | Pełne wsparcie | Testy transakcji z `ROLLBACK` |
 | Poziomy izolacji | Obsługa `READ COMMITTED` i `SERIALIZABLE` | Testy z `SET TRANSACTION ISOLATION LEVEL` |
 | Obsługa deadlocków | Automatyczne wykrywanie i rollback | Symulacja deadlocka w testach |
-| Obsługa błędów | Bloki `EXCEPTION` w procedurach PL/pgSQL | Przegląd kodu procedur |
 
 ### Wymagane działania
 
-- Implementacja bloków `BEGIN...EXCEPTION...END` w procedurach i funkcjach PL/pgSQL
 - Użycie `READ COMMITTED` jako domyślnego poziomu izolacji
-- Użycie `SERIALIZABLE` dla krytycznych operacji (np. przeliczanie sald, cele oszczędnościowe)
+- Użycie `SERIALIZABLE` dla operacji wymagających eliminacji anomalii (Phantom Reads)
 - Przygotowanie przykładów transakcji demonstrujących różne poziomy izolacji w katalogu `sql/transactions/`
-- Dokumentacja scenariuszy obsługi deadlocków i automatycznego rollbacku
 
 ---
 
-## NF-08: Przenoszalność
+## NF-06: Przenoszalność
 
-**Identyfikator:** NF-08
+**Identyfikator:** NF-06
 **Nazwa:** Przenoszalność i utrzymywalność kodu SQL
 **Priorytet:** Niski
 
@@ -236,31 +174,27 @@ Kod SQL powinien być w miarę możliwości zgodny ze standardem SQL, aby ułatw
 | Standardowy SQL | Używany wszędzie, gdzie to możliwe | Przegląd kodu SQL |
 | PL/pgSQL | Ograniczony do logiki wymagającej rozszerzeń PostgreSQL | Przegląd funkcji i procedur |
 | Migracje SQL | Numerowane pliki w katalogu `sql/migrations/` | Przegląd struktury katalogów |
-| Komentarze | W języku polskim, wyjaśniające logikę biznesową | Przegląd kodu SQL |
 
 ### Wymagane działania
 
 - Stosowanie standardowego SQL (`ANSI SQL`) dla zapytań i definicji tabel
 - Wyodrębnienie logiki PL/pgSQL do dedykowanych plików w katalogu `sql/functions/` i `sql/procedures/`
-- Numerowanie plików migracji w formacie `NNN_opis.sql` (np. `001_create_schema.sql`)
-- Dodawanie komentarzy w języku polskim do każdego pliku SQL, wyjaśniających cel i logikę biznesową
+- Numerowanie plików migracji w formacie `NNN_opis.sql` (np. `001_initial_schema.sql`)
 
 ---
 
 ## Podsumowanie
 
-Poniższa tabela zawiera zestawienie wszystkich wymagań niefunkcjonalnych:
+Poniższa tabela zawiera zestawienie wszystkich wymagań niefunkcjonalnych dla projektu zarządzania budżetem:
 
 | ID | Nazwa | Priorytet | Kategoria |
 |---|---|---|---|
-| NF-01 | Wydajność | Wysoki | Wydajność |
-| NF-02 | Bezpieczeństwo | Wysoki | Bezpieczeństwo |
-| NF-03 | Integralność danych | Wysoki | Integralność |
-| NF-04 | Normalizacja | Wysoki | Struktura danych |
-| NF-05 | Skalowalność | Średni | Skalowalność |
-| NF-06 | Audytowalność | Średni | Audyt |
-| NF-07 | Dostępność | Średni | Niezawodność |
-| NF-08 | Przenoszalność | Niski | Utrzymywalność |
+| NF-01 | Bezpieczeństwo | Wysoki | Bezpieczeństwo |
+| NF-02 | Integralność danych | Wysoki | Integralność |
+| NF-03 | Normalizacja | Wysoki | Struktura danych |
+| NF-04 | Audytowalność | Średni | Audyt |
+| NF-05 | Dostępność | Średni | Niezawodność |
+| NF-06 | Przenoszalność | Niski | Utrzymywalność |
 
 > [!NOTE]
 > Wymagania o priorytecie **Wysoki** muszą zostać spełnione przed oddaniem projektu. Wymagania o priorytecie **Średni** i **Niski** są realizowane w miarę dostępnego czasu i zasobów.
