@@ -27,14 +27,14 @@
             </div>
             
             <nav class="nav-menu">
-                <a href="#" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> Pulpit</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-money-bill-transfer"></i> Transakcje</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-piggy-bank"></i> Cele i Budżety</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> Raporty</a>
+                <button class="nav-item active" data-target="view-dashboard"><i class="fa-solid fa-chart-pie"></i> Pulpit</button>
+                <button class="nav-item" data-target="view-transactions"><i class="fa-solid fa-money-bill-transfer"></i> Transakcje</button>
+                <button class="nav-item" data-target="view-goals"><i class="fa-solid fa-piggy-bank"></i> Cele i Budżety</button>
+                <button class="nav-item" data-target="view-reports"><i class="fa-solid fa-chart-line"></i> Raporty</button>
             </nav>
 
             <div class="sidebar-footer">
-                <button class="nav-item"><i class="fa-solid fa-gear"></i> Ustawienia</button>
+                <button class="nav-item" data-target="view-settings"><i class="fa-solid fa-gear"></i> Ustawienia</button>
             </div>
         </aside>
 
@@ -55,7 +55,9 @@
                 </div>
             </header>
 
-            <div class="alert-banner glass-panel danger-glow" id="budgetAlert">
+            <!-- ================= WIDOK PULPITU ================= -->
+            <div id="view-dashboard" class="view-section active">
+                <div class="alert-banner glass-panel danger-glow" id="budgetAlert">
                 <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div class="alert-text">
                     <strong>Wyzwalacz bazy danych zadziałał!</strong>
@@ -132,6 +134,43 @@
                     </div>
                 </div>
             </section>
+            </div> <!-- End view-dashboard -->
+
+            <!-- ================= WIDOK TRANSAKCJE ================= -->
+            <div id="view-transactions" class="view-section">
+                <div class="glass-panel" style="padding: 40px; text-align: center;">
+                    <h2><i class="fa-solid fa-money-bill-transfer" style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;"></i></h2>
+                    <h2>Wszystkie Transakcje</h2>
+                    <p class="subtitle mt-1">Tutaj pojawi się pełna tabela wydatków i przychodów na bazie widoku v_category_expenses.</p>
+                </div>
+            </div>
+
+            <!-- ================= WIDOK CELE I BUDŻETY ================= -->
+            <div id="view-goals" class="view-section">
+                <div class="glass-panel" style="padding: 40px; text-align: center;">
+                    <h2><i class="fa-solid fa-piggy-bank" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i></h2>
+                    <h2>Zarządzanie Budżetem</h2>
+                    <p class="subtitle mt-1">Panel do dodawania nowych celów oszczędnościowych i alertów.</p>
+                </div>
+            </div>
+
+            <!-- ================= WIDOK RAPORTY ================= -->
+            <div id="view-reports" class="view-section">
+                <div class="glass-panel" style="padding: 40px; text-align: center;">
+                    <h2><i class="fa-solid fa-chart-line" style="font-size: 3rem; color: var(--success); margin-bottom: 20px;"></i></h2>
+                    <h2>Raporty i Prognozy</h2>
+                    <p class="subtitle mt-1">Wizualizacje analityczne na bazie widoku materializowanego mv_yearly_summary.</p>
+                </div>
+            </div>
+
+            <!-- ================= WIDOK USTAWIENIA ================= -->
+            <div id="view-settings" class="view-section">
+                <div class="glass-panel" style="padding: 40px; text-align: center;">
+                    <h2><i class="fa-solid fa-gear" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 20px;"></i></h2>
+                    <h2>Ustawienia Konta</h2>
+                    <p class="subtitle mt-1">Zmiana hasła, edycja awatara i ustawienia RLS gospodarstwa domowego.</p>
+                </div>
+            </div>
 
         </main>
     </div>

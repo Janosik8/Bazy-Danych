@@ -126,3 +126,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     });
 });
+
+    // NAVIGATION LOGIC
+    const navItems = document.querySelectorAll('.nav-item[data-target]');
+    const views = document.querySelectorAll('.view-section');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // Remove active from all nav items
+            navItems.forEach(nav => nav.classList.remove('active'));
+            // Add active to clicked nav item
+            item.classList.add('active');
+
+            // Hide all views
+            views.forEach(view => view.classList.remove('active'));
+            
+            // Show targeted view
+            const targetId = item.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
