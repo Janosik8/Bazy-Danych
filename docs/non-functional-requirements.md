@@ -195,6 +195,3 @@ Poniższa tabela zawiera zestawienie wszystkich wymagań niefunkcjonalnych dla p
 | NF-04 | Audytowalność | Średni | Audyt |
 | NF-05 | Dostępność | Średni | Niezawodność |
 | NF-06 | Przenoszalność | Niski | Utrzymywalność |
-
-> [!NOTE]
-> Wymagania o priorytecie **Wysoki** muszą zostać spełnione przed oddaniem projektu. Wymagania o priorytecie **Średni** i **Niski** są realizowane w miarę dostępnego czasu i zasobów.
