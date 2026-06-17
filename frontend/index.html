@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baza Budżetu | Pulpit</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Niestandardowe Style -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        
+        <!-- Pasek Boczny (Sidebar) -->
+        <aside class="sidebar glass-panel">
+            <div class="user-profile">
+                <img src="assets/avatar.jpg" alt="Jan Kowalski" class="avatar">
+                <div class="user-info">
+                    <h2>Jan Kowalski</h2>
+                    <p>Rodzina Kowalskich</p>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> Pulpit</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-money-bill-transfer"></i> Transakcje</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-piggy-bank"></i> Cele i Budżety</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> Raporty</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="nav-item"><i class="fa-solid fa-gear"></i> Ustawienia</button>
+            </div>
+        </aside>
+
+        <!-- Główna Zawartość (Main Content) -->
+        <main class="main-content">
+            
+            <header class="top-bar">
+                <div class="search-bar glass-panel">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" placeholder="Szukaj transakcji lub kategorii...">
+                </div>
+                <div class="actions">
+                    <button class="btn-notification" aria-label="Powiadomienia">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge">1</span>
+                    </button>
+                    <button class="btn-primary" id="addExpenseBtn"><i class="fa-solid fa-plus"></i> Dodaj Wydatek</button>
+                </div>
+            </header>
+
+            <div class="alert-banner glass-panel danger-glow" id="budgetAlert">
+                <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="alert-text">
+                    <strong>Wyzwalacz bazy danych zadziałał!</strong>
+                    <p>Wydatki w kategorii "Wakacje" przekroczyły ustalony próg 80% zaplanowanego budżetu (trg_check_budget_alert).</p>
+                </div>
+            </div>
+
+            <section class="overview-cards">
+                <!-- Saldo Miesiąca -->
+                <div class="card glass-panel card-glow-primary">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-wallet"></i> Saldo (Czerwiec)</h3>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="amount positive" id="monthlyBalance">+ 2,450.00 PLN</h1>
+                        <p class="subtitle">Pobrano z v_monthly_balance</p>
+                    </div>
+                </div>
+
+                <!-- Przychody / Wydatki -->
+                <div class="card glass-panel">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Przepływ</h3>
+                    </div>
+                    <div class="card-body flow-stats">
+                        <div class="stat">
+                            <span class="label">Przychody</span>
+                            <span class="value income">8,500 PLN</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Wydatki</span>
+                            <span class="value expense">6,050 PLN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Postęp Celu -->
+                <div class="card glass-panel">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-car"></i> Cel: Nowy Samochód</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress-info">
+                            <span class="progress-val" id="goalProgress">31.25%</span>
+                            <span class="progress-target">15,000 / 48,000 PLN</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-fill" style="width: 31.25%;"></div>
+                        </div>
+                        <p class="subtitle mt-1">Wyliczono fn_calculate_goal_progress(1)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bottom-section">
+                <!-- Ostatnie Transakcje -->
+                <div class="transactions-panel glass-panel">
+                    <div class="panel-header">
+                        <h2>Ostatnie Transakcje</h2>
+                        <button class="btn-text">Zobacz wszystkie</button>
+                    </div>
+                    <ul class="transaction-list" id="transactionList">
+                        <!-- Lista ładowana z JS -->
+                    </ul>
+                </div>
+
+                <!-- Użycie budżetu -->
+                <div class="budgets-panel glass-panel">
+                    <div class="panel-header">
+                        <h2>Wykorzystanie Budżetu</h2>
+                    </div>
+                    <div class="budget-list" id="budgetList">
+                        <!-- Budżety ładowane z JS -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal (Dodaj Wydatek) -->
+    <div class="modal-overlay" id="expenseModal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2>Nowy Wydatek</h2>
+                <button class="close-btn" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="expenseForm">
+                    <div class="form-group">
+                        <label>Kwota (PLN)</label>
+                        <input type="number" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategoria</label>
+                        <select required>
+                            <option>Jedzenie</option>
+                            <option>Transport</option>
+                            <option>Rachunki</option>
+                            <option>Wakacje</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Opis</label>
+                        <input type="text" placeholder="Za co zapłacono?">
+                    </div>
+                    <button type="submit" class="btn-primary w-100">Zapisz do bazy</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
