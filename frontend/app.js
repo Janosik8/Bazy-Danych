@@ -184,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Categories View
         const catContainer = document.getElementById('categoriesContainer');
         catContainer.innerHTML = '';
+        const formCategorySelect = document.getElementById('formCategory');
+        formCategorySelect.innerHTML = '';
+
         data.categories.forEach(c => {
             catContainer.innerHTML += `
                 <div class="cat-item ${c.scope}">
@@ -194,6 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="cat-badge ${c.scope}">${c.scope === 'global' ? 'SYSTEMOWA' : 'LOKALNA'}</div>
                 </div>
             `;
+            // Dodawaj do selecta w modalu "Dodaj wydatek" (tylko wydatki)
+            if (c.type === 'expense') {
+                formCategorySelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+            }
         });
         
         // Reset Alerts
