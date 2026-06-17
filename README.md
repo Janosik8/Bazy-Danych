@@ -4,7 +4,6 @@ Aplikacja do zarządzania budżetem domowym. Projekt na przedmiot Bazy Danych (s
 
 ## 🛠 Stos
 - **Baza**: PostgreSQL 16+
-- **Frontend**: HTML + CSS + JS
 - **Docs**: Markdown + Mermaid
 
 ## 🚀 Jak zacząć?
